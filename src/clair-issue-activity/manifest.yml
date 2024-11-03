@@ -1,0 +1,18 @@
+modules:
+  jira:issueActivity:
+    - key: clair-issue-activity-hello-world-issue-activity
+      resource: main
+      resolver:
+        function: resolver
+      render: native
+      title: clair-issue-activity
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: main
+    path: src/frontend/index.jsx
+app:
+  runtime:
+    name: nodejs20.x
+  id: ari:cloud:ecosystem::app/e6f3e37e-891c-4f30-b05c-0aa038b31556
