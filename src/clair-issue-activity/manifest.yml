@@ -1,11 +1,11 @@
 modules:
   jira:issueActivity:
-    - key: clair-issue-activity-hello-world-issue-activity
+    - key: clair-issue-activity-issue-activity
       resource: main
       resolver:
         function: resolver
       render: native
-      title: clair-issue-activity
+      title: CLAIR
   function:
     - key: resolver
       handler: index.handler
