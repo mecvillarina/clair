@@ -26,13 +26,14 @@ const App = () => {
 
   return (
     <>
+      <Text>{summary ? summary : 'Loading Summary...'}</Text>
+      <Text>{description ? description : 'Loading Description...'}</Text>
+      
       <Box
         padding='space.200'
         backgroundColor='color.background.accent.green.subtlest'>
           <Heading as="h4">Jira Issues</Heading>
       </Box>
-      <Text>{summary ? summary : 'Loading Summary...'}</Text>
-      <Text>{description ? description : 'Loading Description...'}</Text>
 
       <Box
         padding='space.200'
