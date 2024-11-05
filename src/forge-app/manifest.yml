@@ -10,14 +10,14 @@ modules:
     - key: clair-administration
       function: run-administration
       title: CLAIR Settings
-  webtrigger:
-    - key: run-migration
-      function: run-sql-db-migrations
+  # webtrigger:
+  #   - key: run-migration
+  #     function: run-sql-db-migrations
   trigger:
-    - key: sql-db-provision-schema
-      function: run-sql-db-prov-schema
-      events:
-        - avi:forge:installed:app
+    # - key: sql-db-provision-schema
+    #   function: run-sql-db-prov-schema
+    #   events:
+    #     - avi:forge:installed:app
     - key: issue-created-event
       function: issue-created
       events:
@@ -35,17 +35,35 @@ modules:
       handler: trigger.issueCreated
     - key: issue-updated
       handler: trigger.issueUpdated
-    - key: run-sql-db-prov-schema
-      handler: sql-db.provisionSchema
-    - key: run-sql-db-migrations
-      handler: sql-db.migrate
+    # - key: run-sql-db-prov-schema
+    #   handler: sql-db.provisionSchema
+    # - key: run-sql-db-migrations
+    #   handler: sql-db.migrate
 resources:
   - key: main
     path: static/ui/build
 app:
   runtime:
     name: nodejs20.x
-  id: ari:cloud:ecosystem::app/f89bef09-bf20-459d-a093-d701c16ed64c
+  id: ari:cloud:ecosystem::app/2e6f2179-5e05-498d-8351-6ec16cdf4cb6
+  storage:
+    entities:
+      - name: keyelement
+        attributes:
+          issueKey: 
+            type: string
+          dataKeyPhrases: 
+            type: string
+          dataEntities: 
+            type: string
+          dataIntent: 
+            type: string
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
+        indexes:
+          - issueKey
 permissions:
   scopes:
     - read:jira-work

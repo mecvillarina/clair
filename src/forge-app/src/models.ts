@@ -2,7 +2,7 @@ export interface AppSettingsStorage {
     openAiApiKey: string
 }
 
-export interface KeyElements {
+export interface KeyElement {
     keyPhrases: string[],
     entities: string[],
     intent: string

@@ -1,8 +1,8 @@
 import api, { storage, fetch, route } from "@forge/api";
-import { AppSettingsStorage, buildDefaultSettings, KeyElements } from "../models";
+import { AppSettingsStorage, buildDefaultSettings, KeyElement } from "../models";
 import { APPSETTINGS_STORAGE_KEY } from "../preference-keys";
 
-export async function getKeyElements(prompt): Promise<KeyElements> {
+export async function getKeyElements(prompt): Promise<KeyElement> {
     const appSettings: AppSettingsStorage = await storage.get(APPSETTINGS_STORAGE_KEY) ?? buildDefaultSettings();
 
     if (appSettings.openAiApiKey) {
@@ -67,6 +67,5 @@ export async function getKeyElements(prompt): Promise<KeyElements> {
         console.log("OpenAI Api Key Not Found");
     }
 
-
-    return { keyPhrases: [], entities: [], intent: "" };
+    return null;
 }
