@@ -9,7 +9,7 @@ modules:
   jira:adminPage:
     - key: clair-administration
       function: run-administration
-      title: CLAIR Setup
+      title: CLAIR Settings
   function:
     - key: resolver
       handler: index.handler
