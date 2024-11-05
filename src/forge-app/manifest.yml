@@ -10,11 +10,24 @@ modules:
     - key: clair-administration
       function: run-administration
       title: CLAIR Settings
+  trigger:
+    - key: issue-created-event
+      function: issue-created
+      events:
+        - avi:jira:created:issue
+    - key: issue-updated-event
+      function: issue-updated
+      events:
+        - avi:jira:updated:issue
   function:
     - key: resolver
       handler: index.handler
     - key: run-administration
       handler: administration.run
+    - key: issue-created
+      handler: trigger.issueCreated
+    - key: issue-updated
+      handler: trigger.issueUpdated
 resources:
   - key: main
     path: static/ui/build
@@ -24,4 +37,12 @@ app:
   id: ari:cloud:ecosystem::app/f89bef09-bf20-459d-a093-d701c16ed64c
 permissions:
   scopes:
+    - read:jira-work
     - storage:app
+  external:
+    images:
+      - https://randomuser.me
+    fetch:
+      backend:
+        - https://randomuser.me
+        - https://api.openai.com
