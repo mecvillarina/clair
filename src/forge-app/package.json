@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@forge/resolver": "1.6.1",
+    "@forge/sql": "^2.2.0",
     "@forge/ui": "^1.11.1",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",

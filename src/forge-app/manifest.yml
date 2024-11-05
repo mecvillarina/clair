@@ -10,7 +10,14 @@ modules:
     - key: clair-administration
       function: run-administration
       title: CLAIR Settings
+  webtrigger:
+    - key: run-migration
+      function: run-sql-db-migrations
   trigger:
+    - key: sql-db-provision-schema
+      function: run-sql-db-prov-schema
+      events:
+        - avi:forge:installed:app
     - key: issue-created-event
       function: issue-created
       events:
@@ -28,6 +35,10 @@ modules:
       handler: trigger.issueCreated
     - key: issue-updated
       handler: trigger.issueUpdated
+    - key: run-sql-db-prov-schema
+      handler: sql-db.provisionSchema
+    - key: run-sql-db-migrations
+      handler: sql-db.migrate
 resources:
   - key: main
     path: static/ui/build
