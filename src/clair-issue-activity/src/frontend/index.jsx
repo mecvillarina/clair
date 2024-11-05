@@ -76,3 +76,4 @@ ForgeReconciler.render(
     <App />
   </React.StrictMode>
 );
+

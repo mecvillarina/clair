@@ -1,0 +1,27 @@
+modules:
+  jira:issueActivity:
+    - key: clair-recommender
+      resource: main
+      resolver:
+        function: resolver
+      viewportSize: medium
+      title: CLAIR
+  jira:adminPage:
+    - key: clair-administration
+      function: run-administration
+      title: CLAIR Setup
+  function:
+    - key: resolver
+      handler: index.handler
+    - key: run-administration
+      handler: administration.run
+resources:
+  - key: main
+    path: static/ui/build
+app:
+  runtime:
+    name: nodejs20.x
+  id: ari:cloud:ecosystem::app/f89bef09-bf20-459d-a093-d701c16ed64c
+permissions:
+  scopes:
+    - storage:app

@@ -1,7 +1,14 @@
 modules:
+  trigger:
+    - key: issue-trigger
+      function: trigger
+      events:
+        - avi:jira:created:issue
+        - avi:jira:updated:issue
+        - avi:jira:deleted:issue
   jira:issueActivity:
-    - key: clair-issue-activity-issue-activity
-      resource: main
+    - key: clair-issue-activity
+      resource: ui
       resolver:
         function: resolver
       render: native
@@ -9,8 +16,10 @@ modules:
   function:
     - key: resolver
       handler: index.handler
+    - key: trigger
+      handler: issue-trigger.run
 resources:
-  - key: main
+  - key: ui
     path: src/frontend/index.jsx
 app:
   runtime:
