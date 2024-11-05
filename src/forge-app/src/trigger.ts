@@ -1,5 +1,6 @@
+import moment from "moment";
 import { getIssueDetails } from "./services/jiraService";
-import { GetKeyElementByIssueKey, SaveKeyElement } from "./services/keyElementService";
+import { SaveKeyElement } from "./services/keyElementService";
 import { getKeyElements } from "./services/nlpService";
 
 export async function issueCreated(event: any, context: any) {
@@ -13,22 +14,24 @@ export async function issueUpdated(event: any, context: any) {
 }
 
 async function GetIssueDetailsAndCaptureKeyElements(event) {
+
+    //insert checking when to fetch key elements from NLP Service
     const issueKey = event.issue.key;
 
     const details = await getIssueDetails(issueKey);
     console.log(details.summary);
     console.log(details.description);
-    GetKeyElementByIssueKey(issueKey);
+    console.log(moment().unix());
     const prompt = details.summary.concat(": ", details.description);
 
     if (details.summary && details.description) {
         var result = await getKeyElements(prompt);
 
-        if(result){
+        if (result) {
             console.log(result);
             SaveKeyElement(issueKey, result);
         }
-        else{
+        else {
             console.log("no result");
         }
     }

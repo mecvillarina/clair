@@ -1,6 +1,7 @@
 import api, { storage, fetch, route } from "@forge/api";
 import { AppSettingsStorage, buildDefaultSettings, KeyElement } from "../models";
 import { APPSETTINGS_STORAGE_KEY } from "../preference-keys";
+import moment from "moment";
 
 export async function getKeyElements(prompt): Promise<KeyElement> {
     const appSettings: AppSettingsStorage = await storage.get(APPSETTINGS_STORAGE_KEY) ?? buildDefaultSettings();
@@ -54,7 +55,7 @@ export async function getKeyElements(prompt): Promise<KeyElement> {
             if (data.choices && data.choices[0].message.function_call) {
                 const result = JSON.parse(data.choices[0].message.function_call.arguments);
                 // console.log("Extracted Elements:", result);
-                return { keyPhrases: result.key_phrases, entities: result.entities, intent: result.intent }
+                return { keyPhrases: result.key_phrases, entities: result.entities, intent: result.intent, fetchAt: moment().unix().toString() }
             } else {
                 console.log("No structured response found.");
             }

@@ -5,7 +5,8 @@ export interface AppSettingsStorage {
 export interface KeyElement {
     keyPhrases: string[],
     entities: string[],
-    intent: string
+    intent: string,
+    fetchAt: string
 }
 
 export function buildDefaultSettings(): AppSettingsStorage {

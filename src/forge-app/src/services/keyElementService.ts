@@ -3,30 +3,32 @@ import { KeyElement } from 'src/models';
 import moment from 'moment';
 import { getKeyElements } from './nlpService';
 
-export async function GetKeyElementByIssueKey(issueKey : string): Promise<KeyElement> {
+export async function GetKeyElementFromStorage(issueKey: string) {
     var data = await storage.entity("keyelement")
         .query()
         .index('issueKey')
         .where(WhereConditions.equalsTo(issueKey))
         .getOne();
 
-    if(data){
-        console.log("has data");
-    }
-    else{
-        console.log("no data");
-    }
-    
-    return null;
+    return data;
 }
 
-export async function SaveKeyElement(issueKey : string, newKeyElement : KeyElement) {
-    var keyelement = await GetKeyElementByIssueKey(issueKey);
+export async function GetKeyElement(issueKey: string): Promise<KeyElement | undefined> {
+    var data = await GetKeyElementFromStorage(issueKey);
 
-    if(!newKeyElement)
-    {
+    if (data) {
+        return { keyPhrases: data.value["dataKeyPhrases"].split('|'), entities: data.value["dataEntities"].split('|'), intent: data.value["dataIntent"], fetchAt: data.value["updatedAt"] }
+    }
+}
+
+export async function SaveKeyElement(issueKey: string, newKeyElement: KeyElement) {
+    var storedKeyElement = await GetKeyElementFromStorage(issueKey);
+
+    var epoch = moment().unix().toString(); //in seconds
+
+    if (!storedKeyElement) {
         console.log("insert");
-        var epoch = moment().unix().toString();
+
         await storage.entity("keyelement").set(issueKey, {
             issueKey: issueKey,
             dataKeyPhrases: newKeyElement.keyPhrases.join("|"),
@@ -34,8 +36,20 @@ export async function SaveKeyElement(issueKey : string, newKeyElement : KeyEleme
             dataIntent: newKeyElement.intent,
             createdAt: epoch,
             updatedAt: epoch
-        });    
+        });
     }
-    
+    else {
+        console.log("update");
+
+        await storage.entity("keyelement").set(issueKey, {
+            issueKey: issueKey,
+            dataKeyPhrases: newKeyElement.keyPhrases.join("|"),
+            dataEntities: newKeyElement.entities.join("|"),
+            dataIntent: newKeyElement.intent,
+            createdAt: storedKeyElement.value["createdAt"],
+            updatedAt: epoch
+        });
+    }
+
 
 }
