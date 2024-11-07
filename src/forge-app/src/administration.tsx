@@ -22,6 +22,15 @@ const App = () => {
 
             <Form onSubmit={onSubmit}>
                 <TextField name='openAiApiKey' isRequired defaultValue={formState ? formState.openAiApiKey : ""} label='OpenAI API Key' placeholder='Enter OpenAI API Key'></TextField>
+            
+                <RadioGroup name="resultRetention" label="Result Retention">
+                    <Radio defaultChecked={formState ? formState.resultRetention === "30 minutes" : true} label="30 minutes" value="30 minutes" />
+                    <Radio defaultChecked={formState?.resultRetention === "1 hour"} label="1 hour" value="1 hour" />
+                    <Radio defaultChecked={formState?.resultRetention === "3 hours"} label="3 hours" value="3 hours" />
+                    <Radio defaultChecked={formState?.resultRetention === "6 hours"} label="6 hours" value="6 hours" />
+                    <Radio defaultChecked={formState?.resultRetention === "12 hours"} label="12 hours" value="12 hours" />
+                    <Radio defaultChecked={formState?.resultRetention === "1 day"} label="1 day" value="1 day" />
+                </RadioGroup>
             </Form>
         </AdminPage>
     );

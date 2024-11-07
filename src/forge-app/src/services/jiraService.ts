@@ -1,5 +1,5 @@
 import api, { route } from "@forge/api";
-import { IssueDetails } from "../models";
+import { IssueDetails, RelatedIssueDetails } from "../models";
 import { findAllValuesByKey } from "../utils";
 
 export async function getIssueDetails(issueIdOrKey): Promise<IssueDetails> {
@@ -8,13 +8,13 @@ export async function getIssueDetails(issueIdOrKey): Promise<IssueDetails> {
     return { summary: data.fields.summary, description: findAllValuesByKey(data, "text").join(" ") };
 }
 
-export async function searchIssues(queryTerms: string[]) {
+export async function searchIssues(queryTerms: string[]) : Promise<RelatedIssueDetails[]> {
 
     if (queryTerms === undefined || queryTerms.length == 0) {
         return;
     }
 
-    var pTerms = [];
+    const pTerms = [];
     queryTerms.forEach(element => {
         pTerms.push(`text ~ "${element}"`);
     });
@@ -32,5 +32,13 @@ export async function searchIssues(queryTerms: string[]) {
     });
 
     const data = await res.json();
+    const result : RelatedIssueDetails[] = [];
+
+    data.issues.forEach(element => {
+        result.push({ key: element.key, summary: element.fields.summary, description: findAllValuesByKey(element.fields, "text").join(" "), created: element.fields.created, updated: element.fields.updated });
+    });
+
     console.log(JSON.stringify(data, null, 4));
+
+    return result;
 }
