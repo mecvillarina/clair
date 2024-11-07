@@ -25,7 +25,7 @@ export async function searchIssues(queryTerms: string[]) {
     // jql = encodeURIComponent(jql); 
 
     console.log(jql);
-    const res = await api.asApp().requestJira(route`/rest/api/3/search/jql?jql=${jql}&maxResults=5000&fields=summary,description`, {
+    const res = await api.asApp().requestJira(route`/rest/api/3/search/jql?jql=${jql}&maxResults=5000&fields=summary,description,created,updated`, {
         headers: {
             'Accept': 'application/json'
         }
