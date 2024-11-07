@@ -3,7 +3,7 @@ import { AppSettingsStorage, buildDefaultSettings, KeyElement } from "../models"
 import { APPSETTINGS_STORAGE_KEY } from "../preference-keys";
 import moment from "moment";
 
-export async function getKeyElements(prompt): Promise<KeyElement> {
+export async function extractKeyElement(prompt): Promise<KeyElement> {
     const appSettings: AppSettingsStorage = await storage.get(APPSETTINGS_STORAGE_KEY) ?? buildDefaultSettings();
 
     if (appSettings.openAiApiKey) {
@@ -54,7 +54,7 @@ export async function getKeyElements(prompt): Promise<KeyElement> {
             // console.log(data);
             if (data.choices && data.choices[0].message.function_call) {
                 const result = JSON.parse(data.choices[0].message.function_call.arguments);
-                // console.log("Extracted Elements:", result);
+                console.log("Extracted Elements:", result);
                 return { keyPhrases: result.key_phrases, entities: result.entities, intent: result.intent, fetchAt: moment().unix().toString() }
             } else {
                 console.log("No structured response found.");

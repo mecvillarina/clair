@@ -1,9 +1,9 @@
 import { storage, WhereConditions } from '@forge/api';
 import { KeyElement } from 'src/models';
 import moment from 'moment';
-import { getKeyElements } from './nlpService';
+import { extractKeyElement } from './nlpService';
 
-export async function GetKeyElementFromStorage(issueKey: string) {
+export async function getKeyElementFromStorage(issueKey: string) {
     var data = await storage.entity("keyelement")
         .query()
         .index('issueKey')
@@ -13,16 +13,16 @@ export async function GetKeyElementFromStorage(issueKey: string) {
     return data;
 }
 
-export async function GetKeyElement(issueKey: string): Promise<KeyElement | undefined> {
-    var data = await GetKeyElementFromStorage(issueKey);
+export async function getKeyElement(issueKey: string): Promise<KeyElement | undefined> {
+    var data = await getKeyElementFromStorage(issueKey);
 
     if (data) {
         return { keyPhrases: data.value["dataKeyPhrases"].split('|'), entities: data.value["dataEntities"].split('|'), intent: data.value["dataIntent"], fetchAt: data.value["updatedAt"] }
     }
 }
 
-export async function SaveKeyElement(issueKey: string, newKeyElement: KeyElement) {
-    var storedKeyElement = await GetKeyElementFromStorage(issueKey);
+export async function saveKeyElement(issueKey: string, newKeyElement: KeyElement) {
+    var storedKeyElement = await getKeyElementFromStorage(issueKey);
 
     var epoch = moment().unix().toString(); //in seconds
 

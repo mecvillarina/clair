@@ -1,38 +1,55 @@
 import moment from "moment";
-import { getIssueDetails } from "./services/jiraService";
-import { SaveKeyElement } from "./services/keyElementService";
-import { getKeyElements } from "./services/nlpService";
+import { getIssueDetails, searchIssues } from "./services/jiraService";
+import { getKeyElement, saveKeyElement } from "./services/keyElementService";
+import { extractKeyElement } from "./services/nlpService";
 
 export async function issueCreated(event: any, context: any) {
     console.log("New issue created");
-    GetIssueDetailsAndCaptureKeyElements(event);
+    getIssueDetailsAndCaptureKeyElements(event);
 }
 
 export async function issueUpdated(event: any, context: any) {
     console.log("Old issue updated");
-    GetIssueDetailsAndCaptureKeyElements(event);
+    getIssueDetailsAndCaptureKeyElements(event);
 }
 
-async function GetIssueDetailsAndCaptureKeyElements(event) {
+async function getIssueDetailsAndCaptureKeyElements(event) {
 
-    //insert checking when to fetch key elements from NLP Service
     const issueKey = event.issue.key;
 
-    const details = await getIssueDetails(issueKey);
-    console.log(details.summary);
-    console.log(details.description);
-    console.log(moment().unix());
-    const prompt = details.summary.concat(": ", details.description);
+    //insert checking when to fetch key elements from NLP Service
 
-    if (details.summary && details.description) {
-        var result = await getKeyElements(prompt);
+    let currentKeyElement = await getKeyElement(issueKey);
 
-        if (result) {
-            console.log(result);
-            SaveKeyElement(issueKey, result);
-        }
-        else {
-            console.log("no result");
+    if (!currentKeyElement || +currentKeyElement.fetchAt + 3600 < moment().unix()) {
+        console.log("extracting");
+
+        const details = await getIssueDetails(issueKey);
+        console.log(details.summary);
+        console.log(details.description);
+        console.log(moment().unix());
+        const prompt = details.summary.concat(": ", details.description);
+
+        if (details.summary && details.description) {
+            var result = await extractKeyElement(prompt);
+
+            if (result) {
+                console.log(result);
+                await saveKeyElement(issueKey, result);
+            }
+            else {
+                console.log("no result");
+                return;
+            }
         }
     }
+
+    currentKeyElement = await getKeyElement(issueKey);
+
+    if (currentKeyElement) {
+        console.log(currentKeyElement);
+        await searchIssues(currentKeyElement.keyPhrases.concat(currentKeyElement.entities));
+    }
 }
+
+
