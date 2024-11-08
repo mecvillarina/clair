@@ -3,25 +3,29 @@ import { APPSETTINGS_STORAGE_KEY } from "./preference-keys";
 import { getIssueDetails, searchIssues } from "./services/jiraService";
 import { deleteKeyElement, getKeyElement, saveKeyElement } from "./services/keyElementService";
 import { storage } from "@forge/api";
-import { getSeconds } from "./utils";
+import { cosineSimilarity, getSeconds } from "./utils";
 import moment from "moment";
-import { extractKeyElement } from "./services/nlpService";
+import { extractKeyElement, getEmbedding } from "./services/nlpService";
 
-export async function getRelatedIssues(issueKey: string, isForce = false) : Promise<RelatedIssueDetails[]> {
+export async function getRelatedIssues(issueKey: string, isForce = false): Promise<RelatedIssueDetails[]> {
 
     const appSettings: AppSettingsStorage = await storage.get(APPSETTINGS_STORAGE_KEY) ?? buildDefaultSettings();
     const resultRetention = getSeconds(appSettings.resultRetention);
+    
+    //update caching last fetch on other entity and remove it from keyElement entity
+
     var currentKeyElement = await getKeyElement(issueKey);
     var relatedIssues: RelatedIssueDetails[] = [];
+
+    const issueDetails = await getIssueDetails(issueKey);
 
     if (isForce || !currentKeyElement || +currentKeyElement.fetchAt + resultRetention < moment().unix()) {
         console.log("extracting");
 
-        const details = await getIssueDetails(issueKey);
-        console.log(details.summary, details.description, moment().unix());
-        const prompt = details.summary.concat(": ", details.description);
+        console.log(issueDetails.summary, issueDetails.description, moment().unix());
+        const prompt = issueDetails.summary.concat(": ", issueDetails.description);
 
-        if (details.summary && details.description) {
+        if (issueDetails.summary && issueDetails.description) {
             const result = await extractKeyElement(prompt);
 
             if (result) {
@@ -41,8 +45,27 @@ export async function getRelatedIssues(issueKey: string, isForce = false) : Prom
         var data = currentKeyElement.keyPhrases.concat(currentKeyElement.entities);
         data = data.filter(i => i !== "");
         relatedIssues = await searchIssues(data);
-        
+
         //do logic for ranking and filtering based on Relevance, Recency and Popularity
+
+        if (relatedIssues.length > 0) {
+            const issueDetailsEmbedding = await getEmbedding(issueDetails.summary.concat(": ", issueDetails.description));
+
+            if (issueDetailsEmbedding) {
+                relatedIssues.forEach(async i => {
+                    const relatedIssueEmbedding = await getEmbedding(i.summary.concat(": ", i.description));
+
+                    if(relatedIssueEmbedding) {
+                        const similarity = cosineSimilarity(issueDetailsEmbedding, relatedIssueEmbedding);
+                        console.log("Cosine Similarity:", i.key, similarity);
+
+                        if(similarity >= 0.70) {
+                            
+                        }
+                    }
+                });
+            }
+        }
     }
 
     return relatedIssues;

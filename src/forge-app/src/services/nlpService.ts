@@ -70,3 +70,46 @@ export async function extractKeyElement(prompt): Promise<KeyElement> {
 
     return null;
 }
+
+export async function getEmbedding(text) {
+    const appSettings: AppSettingsStorage = await storage.get(APPSETTINGS_STORAGE_KEY) ?? buildDefaultSettings();
+
+    if (appSettings.openAiApiKey) {
+        const apiKey = appSettings.openAiApiKey;
+        const url = "https://api.openai.com/v1/embeddings";
+
+        const headers = {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+        };
+
+        const body = JSON.stringify({
+            model: "text-embedding-ada-002",
+            input: text
+        });
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: headers,
+                body: body
+            });
+
+            const data = await response.json();
+
+            if (data && data.data && data.data[0].embedding) {
+                return data.data[0].embedding;  // The embedding vector for the input text
+            } else {
+                console.log("No embedding found.");
+            }
+
+        } catch (error) {
+            console.error("Error fetching embedding:", error);
+        }
+    }
+    else {
+        console.log("OpenAI Api Key Not Found");
+    }
+
+    return null;
+}
