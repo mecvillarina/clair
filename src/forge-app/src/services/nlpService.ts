@@ -16,7 +16,7 @@ export async function extractKeyElement(prompt): Promise<KeyElement> {
         };
 
         const body = JSON.stringify({
-            model: "gpt-3.5-turbo-16k",  // Or gpt-4
+            model: "gpt-3.5-turbo-16k",  // Or gpt-4 - add option on admin settings Page
             messages: [
                 { role: "user", content: `Extract key phrases, entities, and intent from the following text:\n"${prompt}"` }
             ],
@@ -54,8 +54,10 @@ export async function extractKeyElement(prompt): Promise<KeyElement> {
             // console.log(data);
             if (data.choices && data.choices[0].message.function_call) {
                 const result = JSON.parse(data.choices[0].message.function_call.arguments);
-                console.log("Extracted Elements:", result);
-                return { keyPhrases: result.key_phrases, entities: result.entities, intent: result.intent, fetchAt: moment().unix().toString() }
+                // console.log("Extracted Elements:", result);
+                const ret = { keyPhrases: result.key_phrases, entities: result.entities, intent: result.intent, fetchAt: moment().unix().toString() };
+                console.log("Extracted Elements:", ret);
+                return ret;
             } else {
                 console.log("No structured response found.");
             }

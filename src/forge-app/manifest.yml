@@ -50,15 +50,23 @@ app:
     entities:
       - name: keyelement
         attributes:
-          issueKey: 
+          issueKey:
             type: string
-          dataKeyPhrases: 
+          dataKeyPhrases:
             type: string
-          dataEntities: 
+          dataEntities:
             type: string
-          dataIntent: 
+          dataIntent:
             type: string
           createdAt:
+            type: string
+          updatedAt:
+            type: string
+        indexes:
+          - issueKey
+      - name: issuefetchdetail
+        attributes:
+          issueKey:
             type: string
           updatedAt:
             type: string

@@ -29,9 +29,27 @@ export function getSeconds(value: "30 minutes" | "1 hour" | "3 hours" | "6 hours
   }
 }
 
-export function cosineSimilarity(vec1, vec2) {
+export function calculateCosineSimilarity(vec1, vec2) {
   const dotProduct = vec1.reduce((sum, val, i) => sum + val * vec2[i], 0);
   const magnitude1 = Math.sqrt(vec1.reduce((sum, val) => sum + val * val, 0));
   const magnitude2 = Math.sqrt(vec2.reduce((sum, val) => sum + val * val, 0));
   return dotProduct / (magnitude1 * magnitude2);
+}
+
+export function calculateRecencyScore(documentDate, lambda = 0.001) {
+  const now = new Date();
+  const documentTimestamp = new Date(documentDate).getTime();
+  const timeDifference = (now.getTime() - documentTimestamp) / (1000 * 60 * 60 * 24); // Convert to days
+  return Math.exp(-lambda * timeDifference);
+}
+
+export function calculate75thPercentile(scores) {
+  // Sort the scores in ascending order
+  scores.sort((a, b) => a - b);
+  
+  // Calculate the index for the 75th percentile
+  const index = Math.ceil(0.75 * scores.length) - 1;
+  
+  // Return the score at the 75th percentile index
+  return scores[index];
 }

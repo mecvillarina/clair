@@ -5,7 +5,7 @@ import { findAllValuesByKey } from "../utils";
 export async function getIssueDetails(issueIdOrKey): Promise<IssueDetails> {
     const res = await api.asApp().requestJira(route`/rest/api/3/issue/${issueIdOrKey}?fields=summary,description`);
     const data = await res.json();
-    return { summary: data.fields.summary, description: findAllValuesByKey(data, "text").join(" ") };
+    return { key: issueIdOrKey, summary: data.fields.summary, description: findAllValuesByKey(data, "text").join(" ") };
 }
 
 export async function searchIssues(queryTerms: string[]) : Promise<RelatedIssueDetails[]> {
@@ -35,10 +35,10 @@ export async function searchIssues(queryTerms: string[]) : Promise<RelatedIssueD
     const result : RelatedIssueDetails[] = [];
 
     data.issues.forEach(element => {
-        result.push({ key: element.key, summary: element.fields.summary, description: findAllValuesByKey(element.fields, "text").join(" "), created: element.fields.created, updated: element.fields.updated });
+        result.push({ key: element.key, summary: element.fields.summary, description: findAllValuesByKey(element.fields, "text").join(" "), created: element.fields.created, updated: element.fields.updated, similarityScore: 0, recencyScore: 0, finalScore: 0 });    
     });
 
-    console.log(JSON.stringify(data, null, 4));
+    // console.log(JSON.stringify(data, null, 4));
 
     return result;
 }

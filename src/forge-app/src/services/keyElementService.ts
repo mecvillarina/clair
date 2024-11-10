@@ -2,7 +2,7 @@ import { storage, WhereConditions } from '@forge/api';
 import { KeyElement } from 'src/models';
 import moment from 'moment';
 
-export async function getKeyElementFromStorage(issueKey: string) {
+async function getKeyElementFromStorage(issueKey: string) {
     const data = await storage.entity("keyelement")
         .query()
         .index('issueKey')
@@ -53,7 +53,6 @@ export async function saveKeyElement(issueKey: string, newKeyElement: KeyElement
             createdAt: storedKeyElement.value["createdAt"],
             updatedAt: epoch
         });
-
     }
 }
 

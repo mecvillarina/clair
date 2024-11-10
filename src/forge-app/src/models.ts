@@ -10,6 +10,11 @@ export interface KeyElement {
     fetchAt: string
 }
 
+export interface IssueFetchDetails {
+    key: string,
+    updatedAt: number,
+}
+
 export function buildDefaultSettings(): AppSettingsStorage {
     return {
         openAiApiKey: "",
@@ -18,12 +23,15 @@ export function buildDefaultSettings(): AppSettingsStorage {
 }
 
 export interface IssueDetails {
+    key: string,
     summary: string;
     description: string;
 }
 
 export interface RelatedIssueDetails extends IssueDetails {
-    key: string,
     created: Date,
-    updated: Date
+    updated: Date,
+    similarityScore: number,
+    recencyScore: number,
+    finalScore: number
 }
