@@ -16,7 +16,7 @@ export async function getKeyElement(issueKey: string): Promise<KeyElement | unde
     const data = await getKeyElementFromStorage(issueKey);
 
     if (data) {
-        return { keyPhrases: data.value["dataKeyPhrases"].split('|'), entities: data.value["dataEntities"].split('|'), intent: data.value["dataIntent"], fetchAt: data.value["updatedAt"] }
+        return { keyPhrases: JSON.parse(data.value["dataKeyPhrases"]), entities: JSON.parse(data.value["dataEntities"]), intent: data.value["dataIntent"], fetchAt: data.value["updatedAt"] }
     }
 }
 
@@ -34,8 +34,8 @@ export async function saveKeyElement(issueKey: string, newKeyElement: KeyElement
 
         await storage.entity("keyelement").set(issueKey, {
             issueKey: issueKey,
-            dataKeyPhrases: newKeyElement.keyPhrases.length > 0 ? newKeyElement.keyPhrases.join("|") : "|",
-            dataEntities: newKeyElement.entities.length > 0 ? newKeyElement.entities.join("|") : "|",
+            dataKeyPhrases: newKeyElement.keyPhrases.length > 0 ? JSON.stringify(newKeyElement.keyPhrases) : "[]",
+            dataEntities: newKeyElement.entities.length > 0 ? JSON.stringify(newKeyElement.entities) : "[]",
             dataIntent: newKeyElement.intent !== "" ? newKeyElement.intent : "|",
             createdAt: epoch,
             updatedAt: epoch
@@ -47,8 +47,8 @@ export async function saveKeyElement(issueKey: string, newKeyElement: KeyElement
 
         await storage.entity("keyelement").set(issueKey, {
             issueKey: issueKey,
-            dataKeyPhrases: newKeyElement.keyPhrases.length > 0 ? newKeyElement.keyPhrases.join("|") : "|",
-            dataEntities: newKeyElement.entities.length > 0 ? newKeyElement.entities.join("|") : "|",
+            dataKeyPhrases: newKeyElement.keyPhrases.length > 0 ? JSON.stringify(newKeyElement.keyPhrases) : "[]",
+            dataEntities: newKeyElement.entities.length > 0 ? JSON.stringify(newKeyElement.entities) : "[]",
             dataIntent: newKeyElement.intent !== "" ? newKeyElement.intent : "|",
             createdAt: storedKeyElement.value["createdAt"],
             updatedAt: epoch

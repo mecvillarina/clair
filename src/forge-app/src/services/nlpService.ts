@@ -16,7 +16,7 @@ export async function extractKeyElement(prompt): Promise<KeyElement> {
         };
 
         const body = JSON.stringify({
-            model: "gpt-3.5-turbo-16k",  // Or gpt-4 - add option on admin settings Page
+            model: appSettings.openAiModel, 
             messages: [
                 { role: "user", content: `Extract key phrases, entities, and intent from the following text:\n"${prompt}"` }
             ],
@@ -75,7 +75,7 @@ export async function extractKeyElement(prompt): Promise<KeyElement> {
 
 export async function getEmbedding(text) {
     const appSettings: AppSettingsStorage = await storage.get(APPSETTINGS_STORAGE_KEY) ?? buildDefaultSettings();
-
+    
     if (appSettings.openAiApiKey) {
         const apiKey = appSettings.openAiApiKey;
         const url = "https://api.openai.com/v1/embeddings";

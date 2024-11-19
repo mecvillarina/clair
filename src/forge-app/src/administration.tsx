@@ -23,6 +23,11 @@ const App = () => {
             <Form onSubmit={onSubmit}>
                 <TextField name='openAiApiKey' isRequired defaultValue={formState ? formState.openAiApiKey : ""} label='OpenAI API Key' placeholder='Enter OpenAI API Key'></TextField>
             
+                <RadioGroup name="openAiModel" label="Open AI Model">
+                    <Radio defaultChecked={formState ? formState.openAiModel === "gpt-3.5-turbo-16k" : true} label="GPT-3.5 Turbo" value="gpt-3.5-turbo-16k" />
+                    <Radio defaultChecked={formState?.openAiModel === "gpt-4"} label="GPT-4" value="gpt-4" />
+                </RadioGroup>
+
                 <RadioGroup name="resultRetention" label="Result Retention">
                     <Radio defaultChecked={formState ? formState.resultRetention === "30 minutes" : true} label="30 minutes" value="30 minutes" />
                     <Radio defaultChecked={formState?.resultRetention === "1 hour"} label="1 hour" value="1 hour" />

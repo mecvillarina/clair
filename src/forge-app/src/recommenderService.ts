@@ -7,26 +7,35 @@ import { calculate75thPercentile, calculateCosineSimilarity, calculateRecencySco
 import moment from "moment";
 import { extractKeyElement, getEmbedding } from "./services/nlpService";
 import { getIssueFetchDetails, updateIssueFetchDetails } from "./services/issueFetchDetailService";
+import { getRelatedIssues, updateRelatedIssues } from "./services/relatedIssueService";
 
-export async function getRelatedIssues(issueKey: string, isForce = false): Promise<RelatedIssueDetails[]> {
+export async function getRecommendedRelatedIssues(issueKey: string, isForce = false): Promise<RelatedIssueDetails[]> {
 
+    //Fetch App Settings - Result Retention
     const appSettings: AppSettingsStorage = await storage.get(APPSETTINGS_STORAGE_KEY) ?? buildDefaultSettings();
     var resultRetention = getSeconds(appSettings.resultRetention);
 
-    resultRetention = 0;
+    // resultRetention = 0;
 
+    //Get Issue Fetch Details for Last Updated Time
     var issueFetchDetails = await getIssueFetchDetails(issueKey);
     var relatedIssues: RelatedIssueDetails[] = [];
 
+    //Check if the issue details need to be fetched based on resultRentention value
     if (isForce || !issueFetchDetails || +issueFetchDetails.updatedAt + resultRetention < moment().unix()) {
+
+        //Get Issue Details - JIRA API
         const issueDetails = await getIssueDetails(issueKey);
 
-        console.log(issueDetails.summary, issueDetails.description, moment().unix());
-        const prompt = issueDetails.summary.concat(": ", issueDetails.description);
-
         if (issueDetails.summary && issueDetails.description) {
+
+            //Construct Prompt
+            const prompt = issueDetails.summary.concat(": ", issueDetails.description);
+
+            //Extract Key Elements
             const result = await extractKeyElement(prompt);
 
+            //Save Key Elements
             if (result) {
                 console.log("Key Elements:", result);
                 await saveKeyElement(issueKey, result);
@@ -37,33 +46,39 @@ export async function getRelatedIssues(issueKey: string, isForce = false): Promi
             }
         }
 
+        //Get Key Elements
         const currentKeyElement = await getKeyElement(issueKey);
 
         if (currentKeyElement) {
             var data = currentKeyElement.keyPhrases.concat(currentKeyElement.entities);
-            // var data = currentKeyElement.keyPhrases;
             data = data.filter(i => i !== "");
+
+            //Search Issues - JIRA API
             var issues = await searchIssues(data);
 
             var issueRankings: RelatedIssueDetails[] = [];
 
             console.log("Current Issue: ", issueDetails.key, ": ", issueDetails.summary);
+
             if (issues.length > 0) {
+                //Get Embedding for Current Issue
                 const currentIssueEmbedding = await getEmbedding(issueDetails.summary.concat(": ", issueDetails.description));
 
                 if (currentIssueEmbedding) {
 
                     for (const i of issues) {
                         if (i.key !== issueKey) {
+                            //Get Embedding for Related Issue
                             const relatedIssueEmbedding = await getEmbedding(i.summary.concat(": ", i.description));
 
                             if (relatedIssueEmbedding) {
-                                //get cosine similarities
+                                //Get Cosine Similarity
                                 const similarityScore = calculateCosineSimilarity(currentIssueEmbedding, relatedIssueEmbedding);
                                 console.log("Cosine Similarity:", i.key, similarityScore);
 
                                 const lambda = 0.002;   // Adjust this to control recency decay rate
 
+                                //Get Recency Score
                                 const recencyScore = calculateRecencyScore(i.updated, lambda);
 
                                 const alpha = 0.8;      // Weight for similarity
@@ -71,21 +86,28 @@ export async function getRelatedIssues(issueKey: string, isForce = false): Promi
 
                                 const finalScore = alpha * similarityScore + beta * recencyScore;
 
-                                console.log(i.key, i.summary, similarityScore, recencyScore, finalScore);
+                                // console.log(i.key, i.summary, similarityScore, recencyScore, finalScore);
                                 issueRankings.push({ key: i.key, summary: i.summary, description: i.description, created: i.created, updated: i.updated, similarityScore: similarityScore, recencyScore: recencyScore, finalScore: finalScore });
                             }
                         }
                     }
 
                     if (issueRankings.length > 0) {
+                        //Calculate 75th Percentile
                         var value = calculate75thPercentile(issueRankings.map(i => i.finalScore));
                         console.log("75th Percentile:", value);
 
-                        issueRankings = issueRankings.filter(i => i.finalScore >= value);
+                        //Filter Issues based on 75th Percentile
+                        issueRankings = issueRankings.filter(i => i.finalScore > 0.75 && i.finalScore >= value);
+
+                        //Sort Issues based on Final Score
+                        issueRankings = issueRankings.sort((a, b) => b.finalScore - a.finalScore);
 
                         console.log("Filtered Issues:", issueRankings);
 
-                        //save rankings
+                        updateRelatedIssues(issueKey, issueRankings);
+
+                        relatedIssues = issueRankings;
                     }
                 }
             }
@@ -93,7 +115,11 @@ export async function getRelatedIssues(issueKey: string, isForce = false): Promi
 
         updateIssueFetchDetails(issueKey);
     }
+    else{
+        relatedIssues = await getRelatedIssues(issueKey);
+    }
 
+    console.log("Related Issues:", relatedIssues);
 
     return relatedIssues;
 }

@@ -72,6 +72,18 @@ app:
             type: string
         indexes:
           - issueKey
+      - name: relatedissue
+        attributes:
+          issueKey:
+            type: string
+          data:
+            type: string
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
+        indexes:
+          - issueKey
 permissions:
   scopes:
     - read:jira-work
