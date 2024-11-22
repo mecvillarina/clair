@@ -10,6 +10,12 @@ modules:
     - key: clair-administration
       function: run-administration
       title: CLAIR Settings
+  consumer:
+    - key: related-issue-job-consumer
+      queue: relatedIssueJobQueue
+      resolver:
+        function: related-issue-queued
+        method: related-issue-job-event-listener
   # webtrigger:
   #   - key: run-migration
   #     function: run-sql-db-migrations
@@ -35,6 +41,8 @@ modules:
       handler: trigger.issueCreated
     - key: issue-updated
       handler: trigger.issueUpdated
+    - key: related-issue-queued
+      handler: relatedIssueQueueEvents.issueJobHandler
     # - key: run-sql-db-prov-schema
     #   handler: sql-db.provisionSchema
     # - key: run-sql-db-migrations
@@ -43,7 +51,7 @@ resources:
   - key: main
     path: static/ui/build
     tunnel: 
-      port: 3001
+      port: 3000
 app:
   runtime:
     name: nodejs20.x

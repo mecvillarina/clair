@@ -56,7 +56,7 @@ export async function getRecommendedRelatedIssues(issueKey: string, isForce = fa
             //Search Issues - JIRA API
             var issues = await searchIssues(data);
 
-            var issueRankings: RelatedIssueDetails[] = [];
+            var filteredRelatedIssues : RelatedIssueDetails[] = [];
 
             console.log("Current Issue: ", issueDetails.key, ": ", issueDetails.summary);
 
@@ -87,27 +87,27 @@ export async function getRecommendedRelatedIssues(issueKey: string, isForce = fa
                                 const finalScore = alpha * similarityScore + beta * recencyScore;
 
                                 // console.log(i.key, i.summary, similarityScore, recencyScore, finalScore);
-                                issueRankings.push({ key: i.key, summary: i.summary, description: i.description, created: i.created, updated: i.updated, similarityScore: similarityScore, recencyScore: recencyScore, finalScore: finalScore });
+                                filteredRelatedIssues.push({ key: i.key, summary: i.summary, description: "", created: i.created, updated: i.updated, similarityScore: similarityScore, recencyScore: recencyScore, finalScore: finalScore });
                             }
                         }
                     }
 
-                    if (issueRankings.length > 0) {
+                    if (filteredRelatedIssues.length > 0) {
                         //Calculate 75th Percentile
-                        var value = calculate75thPercentile(issueRankings.map(i => i.finalScore));
+                        var value = calculate75thPercentile(filteredRelatedIssues.map(i => i.finalScore));
                         console.log("75th Percentile:", value);
 
                         //Filter Issues based on 75th Percentile
-                        issueRankings = issueRankings.filter(i => i.finalScore > 0.75 && i.finalScore >= value);
+                        filteredRelatedIssues = filteredRelatedIssues.filter(i => i.finalScore > 0.75 && i.finalScore >= value);
 
                         //Sort Issues based on Final Score
-                        issueRankings = issueRankings.sort((a, b) => b.finalScore - a.finalScore);
+                        filteredRelatedIssues = filteredRelatedIssues.sort((a, b) => b.finalScore - a.finalScore);
 
-                        console.log("Filtered Issues:", issueRankings);
+                        console.log("Filtered Issues:", filteredRelatedIssues);
 
-                        updateRelatedIssues(issueKey, issueRankings);
+                        updateRelatedIssues(issueKey, filteredRelatedIssues);
 
-                        relatedIssues = issueRankings;
+                        relatedIssues = filteredRelatedIssues;
                     }
                 }
             }

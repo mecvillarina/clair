@@ -17,7 +17,6 @@ export async function getRelatedIssues(issueKey: string) : Promise<RelatedIssueD
 
     if (cache) {
         return JSON.parse(cache.value["data"]);
-        // return { key: issueKey, updatedAt: +data.value["updatedAt"] }
     }
 }
 
