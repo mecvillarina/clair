@@ -56,7 +56,7 @@ export async function getRecommendedRelatedIssues(issueKey: string, isForce = fa
             //Search Issues - JIRA API
             var issues = await searchIssues(data);
 
-            var filteredRelatedIssues : RelatedIssueDetails[] = [];
+            var filteredRelatedIssues: RelatedIssueDetails[] = [];
 
             console.log("Current Issue: ", issueDetails.key, ": ", issueDetails.summary);
 
@@ -66,7 +66,7 @@ export async function getRecommendedRelatedIssues(issueKey: string, isForce = fa
 
                 if (currentIssueEmbedding) {
 
-                    for (const i of issues) {
+                    const filteredRelatedIssuePromises = issues.map(async (i) => {
                         if (i.key !== issueKey) {
                             //Get Embedding for Related Issue
                             const relatedIssueEmbedding = await getEmbedding(i.summary.concat(": ", i.description));
@@ -74,7 +74,7 @@ export async function getRecommendedRelatedIssues(issueKey: string, isForce = fa
                             if (relatedIssueEmbedding) {
                                 //Get Cosine Similarity
                                 const similarityScore = calculateCosineSimilarity(currentIssueEmbedding, relatedIssueEmbedding);
-                                console.log("Cosine Similarity:", i.key, similarityScore);
+                                // console.log("Cosine Similarity:", i.key, similarityScore);
 
                                 const lambda = 0.002;   // Adjust this to control recency decay rate
 
@@ -86,11 +86,42 @@ export async function getRecommendedRelatedIssues(issueKey: string, isForce = fa
 
                                 const finalScore = alpha * similarityScore + beta * recencyScore;
 
+                                console.log("Final Score:", i.key, finalScore);
+
                                 // console.log(i.key, i.summary, similarityScore, recencyScore, finalScore);
-                                filteredRelatedIssues.push({ key: i.key, summary: i.summary, description: "", created: i.created, updated: i.updated, similarityScore: similarityScore, recencyScore: recencyScore, finalScore: finalScore });
+                                filteredRelatedIssues.push({ key: i.key, summary: i.summary, description: "", created: i.created, updated: i.updated, similarityScore: similarityScore, recencyScore: recencyScore, finalScore: finalScore, ranking: 0 });
+                            
                             }
                         }
-                    }
+                    });
+
+                    await Promise.all(filteredRelatedIssuePromises);
+
+                    // for (const i of issues) {
+                    //     if (i.key !== issueKey) {
+                    //         //Get Embedding for Related Issue
+                    //         const relatedIssueEmbedding = await getEmbedding(i.summary.concat(": ", i.description));
+
+                    //         if (relatedIssueEmbedding) {
+                    //             //Get Cosine Similarity
+                    //             const similarityScore = calculateCosineSimilarity(currentIssueEmbedding, relatedIssueEmbedding);
+                    //             console.log("Cosine Similarity:", i.key, similarityScore);
+
+                    //             const lambda = 0.002;   // Adjust this to control recency decay rate
+
+                    //             //Get Recency Score
+                    //             const recencyScore = calculateRecencyScore(i.updated, lambda);
+
+                    //             const alpha = 0.8;      // Weight for similarity
+                    //             const beta = 0.2;       // Weight for recency
+
+                    //             const finalScore = alpha * similarityScore + beta * recencyScore;
+
+                    //             // console.log(i.key, i.summary, similarityScore, recencyScore, finalScore);
+                    //             filteredRelatedIssues.push({ key: i.key, summary: i.summary, description: "", created: i.created, updated: i.updated, similarityScore: similarityScore, recencyScore: recencyScore, finalScore: finalScore, ranking: 0 });
+                    //         }
+                    //     }
+                    // }
 
                     if (filteredRelatedIssues.length > 0) {
                         //Calculate 75th Percentile
@@ -98,12 +129,20 @@ export async function getRecommendedRelatedIssues(issueKey: string, isForce = fa
                         console.log("75th Percentile:", value);
 
                         //Filter Issues based on 75th Percentile
-                        filteredRelatedIssues = filteredRelatedIssues.filter(i => i.finalScore > 0.75 && i.finalScore >= value);
+                        filteredRelatedIssues = filteredRelatedIssues.filter(i => i.finalScore >= value);
 
                         //Sort Issues based on Final Score
                         filteredRelatedIssues = filteredRelatedIssues.sort((a, b) => b.finalScore - a.finalScore);
 
-                        console.log("Filtered Issues:", filteredRelatedIssues);
+                        //Add Ranking
+                        filteredRelatedIssues.forEach(function (issue, index) {
+                            issue.ranking = index + 1;
+                        });
+
+                        //Get Top 50 Issues
+                        filteredRelatedIssues = filteredRelatedIssues.slice(0, 50);
+
+                        // console.log("Filtered Issues:", filteredRelatedIssues);
 
                         updateRelatedIssues(issueKey, filteredRelatedIssues);
 
@@ -115,8 +154,17 @@ export async function getRecommendedRelatedIssues(issueKey: string, isForce = fa
 
         updateIssueFetchDetails(issueKey);
     }
-    else{
+    else {
         relatedIssues = await getRelatedIssues(issueKey);
+
+        const relatedIssuesPromises = relatedIssues.map(async (i) => {
+            var issueDetails = await getIssueDetails(i.key);
+            i.summary = issueDetails.summary;
+        });
+
+        await Promise.all(relatedIssuesPromises);
+
+        updateRelatedIssues(issueKey, relatedIssues);
     }
 
     console.log("Related Issues:", relatedIssues);

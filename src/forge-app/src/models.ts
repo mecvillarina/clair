@@ -35,5 +35,6 @@ export interface RelatedIssueDetails extends IssueDetails {
     updated: Date,
     similarityScore: number,
     recencyScore: number,
-    finalScore: number
+    finalScore: number,
+    ranking: number
 }

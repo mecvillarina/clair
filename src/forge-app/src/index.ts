@@ -1,6 +1,7 @@
 import Resolver from '@forge/resolver';
 import { getRecommendedRelatedIssues } from './recommenderService';
 import { relatedIssueJobQueue } from './relatedIssueQueueEvents';
+import { RelatedIssueDetails } from './models';
 
 const resolver = new Resolver();
 
@@ -11,28 +12,29 @@ resolver.define('getText', (req) => {
 });
 
 resolver.define('getRecommendedRelatedIssues', async (req) => {
+  let result: RelatedIssueDetails[] = [];
 
-  if(req.payload.extension) {
-    console.log(req.payload.extension);
-    const issueKey = req.payload.extension.issue.key;
-    const projectKey = req.payload.extension.project.key;
-    const siteUrl = req.payload.siteUrl;
+  if (req.payload.context) {
+    // console.log(JSON.stringify(req));
+    const extension = req.payload.context.extension;
+    const issueKey = extension.issue.key;
+    const projectKey = extension.project.key;
+    const siteUrl = extension.siteUrl;
 
-    const result = await getRecommendedRelatedIssues(issueKey, false);
+    console.log("SiteUrl:", siteUrl);
+
+    result = await getRecommendedRelatedIssues(issueKey, req.payload.isForce);
     console.log(result);
-
-    return result;
   }
 
-  // const projectKey = req.payload.extension.project.key;
-  // const siteUrl = req.payload.siteUrl;
-
-  // console.log(req);
-  // const result = await getRecommendedRelatedIssues(issueKey, false);
-  // console.log(result);
-  // return `123Issue Key: ${issueKey}, Project Key: ${projectKey}, Site URL: ${siteUrl}`;
-  // return 'hello world';
+  return result;
 });
+
+// resolver.define('getContextExtension', async (req) => {
+
+//   if(req.payload)
+//   return req.context.extension;
+// });
 
 resolver.define('queueItem', async (req) => {
   relatedIssueJobQueue.push({ key: '1234', value: req.payload });

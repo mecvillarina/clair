@@ -18,6 +18,8 @@ export async function getRelatedIssues(issueKey: string) : Promise<RelatedIssueD
     if (cache) {
         return JSON.parse(cache.value["data"]);
     }
+
+    return [];
 }
 
 export async function updateRelatedIssues(issueKey: string, relatedIssues: RelatedIssueDetails[]) : Promise<RelatedIssueDetails[] | undefined> {
