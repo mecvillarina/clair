@@ -135,6 +135,7 @@ function App() {
         defaultPage={1}
         isLoading={isFetchingInsights}
         loadingSpinnerSize="large"
+        emptyView={<Text>We couldn't identify any related issues for this item.</Text>}
       />
     );
   }
@@ -206,6 +207,7 @@ function App() {
         defaultPage={1}
         isLoading={isFetchingInsights}
         loadingSpinnerSize="large"
+        emptyView={<Text>We couldn't find any related pages for this issue at the moment.</Text>}
       />
     );
   }
