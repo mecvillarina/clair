@@ -50,7 +50,7 @@ modules:
 resources:
   - key: main
     path: static/ui/build
-    tunnel: 
+    tunnel:
       port: 3000
 app:
   runtime:
@@ -94,17 +94,28 @@ app:
             type: string
         indexes:
           - issueKey
+      - name: relatedpage
+        attributes:
+          issueKey:
+            type: string
+          data:
+            type: string
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
+        indexes:
+          - issueKey
 permissions:
   scopes:
     - read:jira-work
+    - search:confluence
+    - read:page:confluence
     - storage:app
-  content: 
+  content:
     styles:
-      - 'unsafe-inline'
+      - unsafe-inline
   external:
-    images:
-      - https://randomuser.me
     fetch:
       backend:
-        - https://randomuser.me
         - https://api.openai.com

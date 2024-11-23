@@ -1,7 +1,7 @@
 import ForgeUI, { AdminPage, render, Text, TextField, Form, RadioGroup, Radio, useState, SectionMessage, Code, Strong } from '@forge/ui';
 import { storage } from '@forge/api';
 import { AppSettingsStorage } from './models';
-import { APPSETTINGS_STORAGE_KEY } from './preference-keys';
+import { APPSETTINGS_STORAGE_KEY } from './preferenceKeys';
 
 const App = () => {
     const [formState, setFormState] = useState<AppSettingsStorage>(async () => storage.get(APPSETTINGS_STORAGE_KEY));

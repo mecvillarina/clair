@@ -1,21 +1,15 @@
 import Resolver from '@forge/resolver';
-import { getRecommendedRelatedIssues } from './recommenderService';
+import { fetchRelatedIssues, fetchRelatedPages, getIssueKeyElement, isIssueDetailsAvailable, updateInsightFetchDetails } from './insightService';
 import { relatedIssueJobQueue } from './relatedIssueQueueEvents';
-import { RelatedIssueDetails } from './models';
+import { InsightDetails, KeyElement, RelatedIssueDetails } from './models';
+import { getIssueDetails } from './services/jiraService';
 
 const resolver = new Resolver();
 
-resolver.define('getText', (req) => {
-  // console.log(req);
-
-  return 'Hello, world1!';
-});
-
-resolver.define('getRecommendedRelatedIssues', async (req) => {
-  let result: RelatedIssueDetails[] = [];
+resolver.define('getInsights', async (req) => {
+  let insightDetails: InsightDetails = { relatedIssues: [], relatedPages: [] };
 
   if (req.payload.context) {
-    // console.log(JSON.stringify(req));
     const extension = req.payload.context.extension;
     const issueKey = extension.issue.key;
     const projectKey = extension.project.key;
@@ -23,18 +17,25 @@ resolver.define('getRecommendedRelatedIssues', async (req) => {
 
     console.log("SiteUrl:", siteUrl);
 
-    result = await getRecommendedRelatedIssues(issueKey, req.payload.isForce);
-    console.log(result);
+    const isForceFetching = req.payload.isForceFetching;
+    const isDataAvailable = await isIssueDetailsAvailable(issueKey);
+    const isFetch = isForceFetching || !isDataAvailable;
+
+    const issueDetails = await getIssueDetails(issueKey);
+    const keyElement = await getIssueKeyElement(issueDetails, isFetch);
+    const relatedIssues = await fetchRelatedIssues(issueDetails, keyElement, isFetch);
+    insightDetails.relatedIssues = relatedIssues;
+
+    const relatedPages = await fetchRelatedPages(issueDetails, keyElement, isFetch);
+    insightDetails.relatedPages = relatedPages;
+
+    if (isFetch && (relatedIssues.length > 0 || relatedPages.length > 0)) {
+      updateInsightFetchDetails(issueKey);
+    }
   }
 
-  return result;
+  return insightDetails;
 });
-
-// resolver.define('getContextExtension', async (req) => {
-
-//   if(req.payload)
-//   return req.context.extension;
-// });
 
 resolver.define('queueItem', async (req) => {
   relatedIssueJobQueue.push({ key: '1234', value: req.payload });

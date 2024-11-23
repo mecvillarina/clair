@@ -1,6 +1,6 @@
 import api, { storage, fetch, route } from "@forge/api";
 import { AppSettingsStorage, buildDefaultSettings, KeyElement } from "../models";
-import { APPSETTINGS_STORAGE_KEY } from "../preference-keys";
+import { APPSETTINGS_STORAGE_KEY } from "../preferenceKeys";
 import moment from "moment";
 
 export async function extractKeyElement(prompt): Promise<KeyElement> {
@@ -16,7 +16,7 @@ export async function extractKeyElement(prompt): Promise<KeyElement> {
         };
 
         const body = JSON.stringify({
-            model: appSettings.openAiModel, 
+            model: appSettings.openAiModel,
             messages: [
                 { role: "user", content: `Extract key phrases, entities, and intent from the following text:\n"${prompt}"` }
             ],
@@ -37,8 +37,6 @@ export async function extractKeyElement(prompt): Promise<KeyElement> {
             ],
             function_call: { "name": "extract_elements" }
         });
-
-        // console.log(body);
 
         try {
             // Make the request using fetch
@@ -75,7 +73,7 @@ export async function extractKeyElement(prompt): Promise<KeyElement> {
 
 export async function getEmbedding(text) {
     const appSettings: AppSettingsStorage = await storage.get(APPSETTINGS_STORAGE_KEY) ?? buildDefaultSettings();
-    
+
     if (appSettings.openAiApiKey) {
         const apiKey = appSettings.openAiApiKey;
         const url = "https://api.openai.com/v1/embeddings";

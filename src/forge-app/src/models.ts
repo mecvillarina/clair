@@ -26,15 +26,43 @@ export function buildDefaultSettings(): AppSettingsStorage {
 
 export interface IssueDetails {
     key: string,
-    summary: string;
-    description: string;
+    summary: string,
+    description: string,
+    created: Date,
+    updated: Date,
 }
 
-export interface RelatedIssueDetails extends IssueDetails {
+export interface RelatedIssueDetails {
+    key: string,
+    summary: string,
     created: Date,
     updated: Date,
     similarityScore: number,
     recencyScore: number,
     finalScore: number,
     ranking: number
+}
+
+export interface PageDetails {
+    id: string,
+    title: string,
+    description: string,
+    url: string,
+    updated: Date
+}
+
+export interface RelatedPageDetails {
+    id: string,
+    title: string,
+    url: string,
+    updated: Date,
+    similarityScore: number,
+    recencyScore: number,
+    finalScore: number,
+    ranking: number
+}
+
+export interface InsightDetails {
+    relatedIssues: RelatedIssueDetails[],
+    relatedPages: RelatedPageDetails[]
 }

@@ -12,17 +12,23 @@ async function getRelatedIssuesFromStorage(issueKey: string) {
     return data;
 }
 
-export async function getRelatedIssues(issueKey: string) : Promise<RelatedIssueDetails[] | undefined> {
-    const cache = await getRelatedIssuesFromStorage(issueKey);
+export async function getRelatedIssues(issueKey: string): Promise<RelatedIssueDetails[] | undefined> {
 
-    if (cache) {
-        return JSON.parse(cache.value["data"]);
+    try {
+        const cache = await getRelatedIssuesFromStorage(issueKey);
+
+        if (cache) {
+            return JSON.parse(cache.value["data"]);
+        }
+    }
+    catch (e) {
+        console.log(e);
     }
 
     return [];
 }
 
-export async function updateRelatedIssues(issueKey: string, relatedIssues: RelatedIssueDetails[]) : Promise<RelatedIssueDetails[] | undefined> {
+export async function updateRelatedIssues(issueKey: string, relatedIssues: RelatedIssueDetails[]): Promise<RelatedIssueDetails[] | undefined> {
     const epoch = moment().unix().toString(); //in seconds
 
     await storage.entity("relatedissue").set(issueKey, {

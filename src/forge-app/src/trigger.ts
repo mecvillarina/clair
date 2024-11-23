@@ -1,11 +1,11 @@
-import { getRecommendedRelatedIssues } from "./recommenderService";
+import { fetchRelatedIssues } from "./insightService";
 
 export async function issueCreated(event: any, context: any) {
     console.log("New issue created");
-    getRecommendedRelatedIssues(event.issue.key);
+    // fetchRelatedIssues(event.issue.key);
 }
 
 export async function issueUpdated(event: any, context: any) {
     console.log("Old issue updated");
-    getRecommendedRelatedIssues(event.issue.key);
+    // fetchRelatedIssues(event.issue.key);
 }

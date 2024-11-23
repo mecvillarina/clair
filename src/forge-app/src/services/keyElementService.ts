@@ -13,10 +13,16 @@ async function getKeyElementFromStorage(issueKey: string) {
 }
 
 export async function getKeyElement(issueKey: string): Promise<KeyElement | undefined> {
-    const data = await getKeyElementFromStorage(issueKey);
 
-    if (data) {
-        return { keyPhrases: JSON.parse(data.value["dataKeyPhrases"]), entities: JSON.parse(data.value["dataEntities"]), intent: data.value["dataIntent"], fetchAt: data.value["updatedAt"] }
+    try {
+        const data = await getKeyElementFromStorage(issueKey);
+
+        if (data) {
+            return { keyPhrases: JSON.parse(data.value["dataKeyPhrases"]), entities: JSON.parse(data.value["dataEntities"]), intent: data.value["dataIntent"], fetchAt: data.value["updatedAt"] }
+        }
+    }
+    catch (e) {
+        console.log(e);
     }
 }
 

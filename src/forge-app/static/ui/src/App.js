@@ -16,7 +16,8 @@ function App() {
   const [siteUrl, setSiteUrl] = useState(null);
 
   const [relatedIssues, setRelatedIssues] = useState([]);
-  const [isFetchingResults, setIsFetchingResults] = useState(true);
+  const [relatedPages, setRelatedPages] = useState([]);
+  const [isFetchingInsights, setIsFetchingInsights] = useState(true);
 
   useEffect(() => {
     view.getContext().then((context) => {
@@ -31,15 +32,16 @@ function App() {
 
   useEffect(() => {
     if(context) {
-      fetchResults(false);
+      getInsights(false);
     }
   }, [context]);
 
-  const fetchResults = (isForce) => {
-    setIsFetchingResults(true);
-    invoke('getRecommendedRelatedIssues', { context, isForce: isForce }).then((data) => {
-      setRelatedIssues(data);
-      setIsFetchingResults(false);
+  const getInsights = (isForceFetching) => {
+    setIsFetchingInsights(true);
+    invoke('getInsights', { context, isForceFetching: isForceFetching }).then((data) => {
+      setRelatedIssues(data.relatedIssues);
+      setRelatedPages(data.relatedPages);
+      setIsFetchingInsights(false);
     });
   };
 
@@ -47,11 +49,15 @@ function App() {
     router.open(`/browse/${issueKey}`);
   }
 
+  function navigateToUrl(url){
+    router.open(url);
+  }
+
   const renderTitle = () => {
     return (
       <Inline alignBlock="center" spread="space-between">
         <Heading size="medium">CLAIR Insights</Heading>
-        <Button appearance="subtle" isDisabled={isFetchingResults} onClick={() => fetchResults(true)}>Refresh</Button>
+        <Button appearance="subtle" isDisabled={isFetchingInsights} onClick={() => getInsights(true)}>Refresh</Button>
       </Inline>
     );
   }
@@ -125,15 +131,15 @@ function App() {
       <DynamicTable
         head={head}
         rows={rows}
-        rowsPerPage={20}
+        rowsPerPage={50}
         defaultPage={1}
-        isLoading={isFetchingResults}
+        isLoading={isFetchingInsights}
         loadingSpinnerSize="large"
       />
     );
   }
 
-  const renderRelatedIssue = () => {
+  const renderRelatedIssues = () => {
     return (
       <Stack space="space.050">
         {renderRelatedIssuesTitle()}
@@ -142,11 +148,82 @@ function App() {
     );
 
   }
+
+  
+  const renderRelatedPagesTitle = () => {
+    return (
+      <Box paddingInline="space.150" paddingBlock="space.100" backgroundColor="color.background.accent.gray.subtle">
+        <Heading size="small" color="color.text.inverse">Related Pages</Heading>
+      </Box>
+    );
+  }
+
+  const renderRelatedPagesBody = () => {
+    const rows = relatedPages.map((page) => {
+      return {
+        cells: [
+          {
+            key: 'rank',
+            content: <Text align='center'>{page.ranking}</Text>,
+          },
+          {
+            key: 'title',
+            content: 
+            <Link onClick={() => navigateToUrl(page.url)}>
+            {page.title}
+		        </Link>
+          },
+          {
+            key: 'score',
+            content: <Text>{(page.finalScore * 100).toFixed(2)}%</Text>,
+          },
+        ],
+      };
+    });
+
+    const head = {
+      cells: [
+        {
+          key: 'rank',
+          content: <Text>Rank</Text>,
+        },
+        {
+          key: 'title',
+          content: <Text>Title</Text>,
+        },
+        {
+          key: 'score',
+          content: <Text>Context Fit (%)</Text>,
+        },
+      ],
+    };
+
+    return (
+      <DynamicTable
+        head={head}
+        rows={rows}
+        rowsPerPage={50}
+        defaultPage={1}
+        isLoading={isFetchingInsights}
+        loadingSpinnerSize="large"
+      />
+    );
+  }
+
+  const renderRelatedPages = () => {
+    return (
+      <Stack space="space.050">
+        {renderRelatedPagesTitle()}
+        {renderRelatedPagesBody()}
+      </Stack>
+    )
+  }
   return (
     <div>
       <Stack space="space.200">
         {renderTitle()}
-        {renderRelatedIssue()}
+        {renderRelatedIssues()}
+        {renderRelatedPages()}
       </Stack>
     </div>
   );
