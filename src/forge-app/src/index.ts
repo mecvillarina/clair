@@ -1,7 +1,7 @@
 import Resolver from '@forge/resolver';
 import { fetchRelatedIssues, fetchRelatedPages, getIssueKeyElement, isIssueDetailsAvailable, updateInsightFetchDetails } from './insightService';
 import { relatedIssueJobQueue } from './relatedIssueQueueEvents';
-import { InsightDetails, KeyElement, RelatedIssueDetails } from './models';
+import { InsightDetails, KeyElement, RelatedIssueDetails, RelatedPageDetails } from './models';
 import { getIssueDetails } from './services/jiraService';
 
 const resolver = new Resolver();
@@ -12,10 +12,6 @@ resolver.define('getInsights', async (req) => {
   if (req.payload.context) {
     const extension = req.payload.context.extension;
     const issueKey = extension.issue.key;
-    const projectKey = extension.project.key;
-    const siteUrl = extension.siteUrl;
-
-    console.log("SiteUrl:", siteUrl);
 
     const isForceFetching = req.payload.isForceFetching;
     const isDataAvailable = await isIssueDetailsAvailable(issueKey);
@@ -23,13 +19,24 @@ resolver.define('getInsights', async (req) => {
 
     const issueDetails = await getIssueDetails(issueKey);
     const keyElement = await getIssueKeyElement(issueDetails, isFetch);
-    const relatedIssues = await fetchRelatedIssues(issueDetails, keyElement, isFetch);
-    insightDetails.relatedIssues = relatedIssues;
 
-    const relatedPages = await fetchRelatedPages(issueDetails, keyElement, isFetch);
-    insightDetails.relatedPages = relatedPages;
+    await Promise.all<unknown>(
+      [
+        fetchRelatedIssues(issueDetails, keyElement, isFetch), 
+        fetchRelatedPages(issueDetails, keyElement, isFetch)]
+      )
+      .then(results => {
+        insightDetails.relatedIssues = results[0] as RelatedIssueDetails[];
+        insightDetails.relatedPages = results[1] as RelatedPageDetails[];
+    });
 
-    if (isFetch && (relatedIssues.length > 0 || relatedPages.length > 0)) {
+    // const relatedIssues = await fetchRelatedIssues(issueDetails, keyElement, isFetch);
+    // insightDetails.relatedIssues = relatedIssues;
+
+    // const relatedPages = await fetchRelatedPages(issueDetails, keyElement, isFetch);
+    // insightDetails.relatedPages = relatedPages;
+
+    if (isFetch && (insightDetails.relatedIssues.length > 0 || insightDetails.relatedPages.length > 0)) {
       updateInsightFetchDetails(issueKey);
     }
   }
