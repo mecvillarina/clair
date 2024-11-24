@@ -1,4 +1,4 @@
-import ForgeUI, { AdminPage, render, Text, TextField, Form, RadioGroup, Radio, useState, SectionMessage } from '@forge/ui';
+import ForgeUI, { AdminPage, render, Text, TextField, Form, RadioGroup, Radio, useState, SectionMessage, Heading } from '@forge/ui';
 import { storage } from '@forge/api';
 import { AppSettingsStorage } from './models';
 import { APPSETTINGS_STORAGE_KEY } from './preferenceKeys';
@@ -21,14 +21,18 @@ const App = () => {
                 </SectionMessage>}
 
             <Form onSubmit={onSubmit}>
+                <Heading size='medium'>OpenAI Configuration</Heading>
+
                 <TextField name='openAiApiKey' isRequired defaultValue={formState ? formState.openAiApiKey : ""} label='OpenAI API Key' placeholder='Enter OpenAI API Key'></TextField>
             
-                <RadioGroup name="openAiModel" label="Open AI Model">
+                <RadioGroup name="openAiModel" label="OpenAI Model">
                     <Radio defaultChecked={formState ? formState.openAiModel === "gpt-3.5-turbo-16k" : true} label="GPT-3.5 Turbo" value="gpt-3.5-turbo-16k" />
                     <Radio defaultChecked={formState?.openAiModel === "gpt-4"} label="GPT-4" value="gpt-4" />
                 </RadioGroup>
 
-                <RadioGroup name="resultRetention" label="Result Retention">
+                <Heading size='medium'>CLAIR Insight Configuration</Heading>
+
+                <RadioGroup name="resultRetention" label="CLAIR Insight Result Retention">
                     <Radio defaultChecked={formState ? formState.resultRetention === "24 hours" : true} label="24 hours" value="24 hours" />
                     <Radio defaultChecked={formState?.resultRetention === "7 days"} label="7 days" value="7 days" />
                     <Radio defaultChecked={formState?.resultRetention === "14 days"} label="14 days" value="14 days" />
