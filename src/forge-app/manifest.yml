@@ -9,7 +9,7 @@ modules:
   jira:issuePanel:
     - key: clair-issue-panel
       function: run-issuePanel
-      title: CLAIR Panel
+      title: CLAIR Notes
       render: native
       icon: https://developer.atlassian.com/platform/forge/images/icons/issue-panel-icon.svg
   jira:adminPage:
@@ -100,6 +100,14 @@ app:
           createdAt:
             type: string
           updatedAt:
+            type: string
+        indexes:
+          - issueKey
+      - name: clairnote
+        attributes:
+          issueKey:
+            type: string
+          data:
             type: string
         indexes:
           - issueKey

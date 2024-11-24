@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { invoke, view, router } from '@forge/bridge';
-import Button from '@atlaskit/button/new';
+import { invoke, view, router, showFlag } from '@forge/bridge';
+import Button, { IconButton } from '@atlaskit/button/new';
 import { Stack, Box, Text, Inline } from '@atlaskit/primitives';
 import Heading from '@atlaskit/heading';
 import DynamicTable from '@atlaskit/dynamic-table';
 import Link from '@atlaskit/link';
+import AddIcon from '@atlaskit/icon/glyph/add';
+import { token } from '@atlaskit/tokens';
 
 function App() {
   const [context, setContext] = useState(null);
@@ -15,6 +17,7 @@ function App() {
   const [relatedIssues, setRelatedIssues] = useState([]);
   const [relatedPages, setRelatedPages] = useState([]);
   const [isFetchingInsights, setIsFetchingInsights] = useState(true);
+  const [isAddingToNotes, setIsAddingToNotes] = useState(false);
 
   useEffect(() => {
     view.getContext().then((context) => {
@@ -28,7 +31,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if(context) {
+    if (context) {
       getInsights(false);
     }
   }, [context]);
@@ -42,11 +45,42 @@ function App() {
     });
   };
 
+  const addRelatedIssueToNotes = (relatedIssue) => {
+    setIsAddingToNotes(true);
+    invoke('addRelatedIssueToNotes', { context, relatedIssue, siteUrl }).then(data => {
+      const flag = showFlag({
+        id: 'related-issue-added',
+        title: data ? 'Issue Added to CLAIR Notes' : 'Issue Already in CLAIR Notes',
+        type: data ? 'success' : 'error',
+        description: data ? 'Selected issue has been added to CLAIR Notes for easy access.' : 'The issue already saved in the CLAIR Notes. If needed, you can refresh the panel using the Refresh button.',
+        actions: [],
+        isAutoDismiss: true,
+      });
+      setIsAddingToNotes(false);
+    });
+  };
+
+  const addRelatedPageToNotes = (relatedPage) => {
+    setIsAddingToNotes(true);
+    invoke('addRelatedPageToNotes', { context, relatedPage }).then(data => {
+      const flag = showFlag({
+        id: 'related-page-added',
+        title: data ? 'Page Added to CLAIR Notes' : 'Page Already in CLAIR Notes',
+        type: data ? 'success' : 'error',
+        description: data ? 'Selected page has been added to CLAIR Notes for easy access.' : 'The page already saved in the CLAIR Notes. If needed, you can refresh the panel using the Refresh button.',
+        actions: [],
+        isAutoDismiss: true
+      });
+
+      setIsAddingToNotes(false);
+    });
+  };
+
   function navigateToIssue(issueKey) {
     router.open(`/browse/${issueKey}`);
   }
 
-  function navigateToUrl(url){
+  function navigateToUrl(url) {
     router.open(url);
   }
 
@@ -54,7 +88,7 @@ function App() {
     return (
       <Inline alignBlock="center" spread="space-between">
         <Heading size="medium">CLAIR Insights</Heading>
-        <Button appearance="subtle" isDisabled={isFetchingInsights} onClick={() => getInsights(true)}>Refresh</Button>
+        <Button appearance="subtle" isDisabled={isFetchingInsights || isAddingToNotes} onClick={() => getInsights(true)}>Refresh</Button>
       </Inline>
     );
   }
@@ -62,7 +96,7 @@ function App() {
   const renderRelatedIssuesTitle = () => {
     return (
       <Box paddingInline="space.150" paddingBlock="space.100" backgroundColor="color.background.accent.green.subtle">
-        <Heading size="small" color="color.text.inverse">Related Issues</Heading>
+        <Heading size="small" color="color.text.inverse">Relevant Issues</Heading>
       </Box>
     );
   }
@@ -78,10 +112,10 @@ function App() {
           },
           {
             key: 'issue',
-            content: 
-            <Link onClick={() => navigateToIssue(issue.key)}>
-            [{issue.key}]
-		        </Link>
+            content:
+              <Link onClick={() => navigateToIssue(issue.key)}>
+                [{issue.key}]
+              </Link>
           },
           {
             key: 'summary',
@@ -91,10 +125,20 @@ function App() {
             key: 'score',
             content: <Text>{(issue.finalScore * 100).toFixed(2)}%</Text>,
           },
-          // {
-          //   key: 'action',
-          //   content: <LinkButton onClick={() => navigateToIssue(issue.key)}>View</LinkButton>
-          // },
+          {
+            key: 'action',
+            content: <IconButton
+              isDisabled={isAddingToNotes}
+              onClick={() => addRelatedIssueToNotes(issue)}
+              label="Add to Notes"
+              icon={(iconProps) => (
+                <AddIcon
+                  {...iconProps}
+                  size="small"
+                  primaryColor={token('color.icon.accent.green')}
+                />
+              )} />
+          }
         ],
       };
     });
@@ -116,6 +160,10 @@ function App() {
         {
           key: 'score',
           content: <Text>Context Fit (%)</Text>,
+        },
+        {
+          key: 'action',
+          content: <Text>Action</Text>,
         },
         // {
         //   key: 'action',
@@ -147,11 +195,11 @@ function App() {
 
   }
 
-  
+
   const renderRelatedPagesTitle = () => {
     return (
       <Box paddingInline="space.150" paddingBlock="space.100" backgroundColor="color.background.accent.gray.subtle">
-        <Heading size="small" color="color.text.inverse">Related Pages</Heading>
+        <Heading size="small" color="color.text.inverse">Relevant Pages</Heading>
       </Box>
     );
   }
@@ -166,15 +214,29 @@ function App() {
           },
           {
             key: 'title',
-            content: 
-            <Link onClick={() => navigateToUrl(page.url)}>
-            {page.title}
-		        </Link>
+            content:
+              <Link onClick={() => navigateToUrl(page.url)}>
+                {page.title}
+              </Link>
           },
           {
             key: 'score',
             content: <Text>{(page.finalScore * 100).toFixed(2)}%</Text>,
           },
+          {
+            key: 'action',
+            content: <IconButton
+              isDisabled={isAddingToNotes}
+              onClick={() => addRelatedPageToNotes(page)}
+              label="Add to Notes"
+              icon={(iconProps) => (
+                <AddIcon
+                  {...iconProps}
+                  size="small"
+                  primaryColor={token('color.icon.accent.green')}
+                />
+              )} />
+          }
         ],
       };
     });
@@ -192,6 +254,10 @@ function App() {
         {
           key: 'score',
           content: <Text>Context Fit (%)</Text>,
+        },
+        {
+          key: 'action',
+          content: <Text>Action</Text>,
         },
       ],
     };

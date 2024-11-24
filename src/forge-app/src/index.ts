@@ -3,6 +3,7 @@ import { fetchRelatedIssues, fetchRelatedPages, getIssueKeyElement, isIssueDetai
 import { relatedIssueJobQueue } from './relatedIssueQueueEvents';
 import { InsightDetails, RelatedIssueDetails, RelatedPageDetails } from './models';
 import { getIssueDetails } from './services/jiraService';
+import { addNoteItem } from './services/noteService';
 
 const resolver = new Resolver();
 
@@ -42,6 +43,33 @@ resolver.define('getInsights', async (req) => {
   }
 
   return insightDetails;
+});
+
+resolver.define('addRelatedIssueToNotes', async (req) => {
+    if(req.payload.context && req.payload.relatedIssue && req.payload.siteUrl) {
+
+      const extension = req.payload.context.extension;
+      const issueKey = extension.issue.key;
+      const relatedIssue = req.payload.relatedIssue;
+      const siteUrl = req.payload.siteUrl;
+
+      console.log(`Adding related issue ${relatedIssue.key} to notes`);
+
+      return await addNoteItem(issueKey, { contentKey: relatedIssue.key, contentType: 'Issue', title: `[${relatedIssue.key}]`.concat(" ", relatedIssue.summary), url: `${siteUrl}/browse/${relatedIssue.key}` });
+    }
+});
+
+resolver.define('addRelatedPageToNotes', async (req) => {
+  if(req.payload.context && req.payload.relatedPage) {
+
+    const extension = req.payload.context.extension;
+    const issueKey = extension.issue.key;
+    const relatedPage = req.payload.relatedPage;
+
+    console.log(`Adding related page ${relatedPage.id} to notes`);
+
+    return await addNoteItem(issueKey, { contentKey: relatedPage.id, contentType: 'Page', title: relatedPage.title, url: relatedPage.url });
+  }
 });
 
 resolver.define('queueItem', async (req) => {

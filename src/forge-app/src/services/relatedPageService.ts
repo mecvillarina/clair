@@ -2,8 +2,10 @@ import { storage, WhereConditions } from '@forge/api';
 import { RelatedPageDetails } from 'src/models';
 import moment from 'moment';
 
+const entityKey = "relatedpage";
+
 async function getRelatedPageFromStorage(issueKey: string) {
-    const data = await storage.entity("relatedpage")
+    const data = await storage.entity(entityKey)
         .query()
         .index('issueKey')
         .where(WhereConditions.equalsTo(issueKey))
@@ -31,7 +33,7 @@ export async function getRelatedPages(issueKey: string): Promise<RelatedPageDeta
 export async function updateRelatedPages(issueKey: string, relatedIssues: RelatedPageDetails[]): Promise<RelatedPageDetails[] | undefined> {
     const epoch = moment().unix().toString(); //in seconds
 
-    await storage.entity("relatedpage").set(issueKey, {
+    await storage.entity(entityKey).set(issueKey, {
         issueKey: issueKey,
         data: JSON.stringify(relatedIssues),
         createdAt: epoch,

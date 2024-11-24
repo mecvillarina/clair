@@ -66,3 +66,10 @@ export interface InsightDetails {
     relatedIssues: RelatedIssueDetails[],
     relatedPages: RelatedPageDetails[]
 }
+
+export interface ClairNoteItem {
+    contentKey: string,
+    contentType: string,
+    title: string,
+    url: string
+}
