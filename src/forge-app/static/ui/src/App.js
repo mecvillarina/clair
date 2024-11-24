@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { invoke, view, router } from '@forge/bridge';
-import Button, { LinkButton } from '@atlaskit/button/new';
-import { Grid, Stack, Box, Text, Inline } from '@atlaskit/primitives';
-import PageHeader from '@atlaskit/page-header';
-import Spinner from '@atlaskit/spinner';
+import Button from '@atlaskit/button/new';
+import { Stack, Box, Text, Inline } from '@atlaskit/primitives';
 import Heading from '@atlaskit/heading';
-import { render } from '@forge/ui';
 import DynamicTable from '@atlaskit/dynamic-table';
 import Link from '@atlaskit/link';
 
@@ -135,6 +132,7 @@ function App() {
         defaultPage={1}
         isLoading={isFetchingInsights}
         loadingSpinnerSize="large"
+        emptyView={<Text>We couldn't identify any related issues for this item.</Text>}
       />
     );
   }
@@ -206,6 +204,7 @@ function App() {
         defaultPage={1}
         isLoading={isFetchingInsights}
         loadingSpinnerSize="large"
+        emptyView={<Text>We couldn't find any related pages for this issue at the moment.</Text>}
       />
     );
   }

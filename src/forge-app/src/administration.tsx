@@ -1,4 +1,4 @@
-import ForgeUI, { AdminPage, render, Text, TextField, Form, RadioGroup, Radio, useState, SectionMessage, Code, Strong } from '@forge/ui';
+import ForgeUI, { AdminPage, render, Text, TextField, Form, RadioGroup, Radio, useState, SectionMessage } from '@forge/ui';
 import { storage } from '@forge/api';
 import { AppSettingsStorage } from './models';
 import { APPSETTINGS_STORAGE_KEY } from './preferenceKeys';
@@ -29,12 +29,10 @@ const App = () => {
                 </RadioGroup>
 
                 <RadioGroup name="resultRetention" label="Result Retention">
-                    <Radio defaultChecked={formState ? formState.resultRetention === "30 minutes" : true} label="30 minutes" value="30 minutes" />
-                    <Radio defaultChecked={formState?.resultRetention === "1 hour"} label="1 hour" value="1 hour" />
-                    <Radio defaultChecked={formState?.resultRetention === "3 hours"} label="3 hours" value="3 hours" />
-                    <Radio defaultChecked={formState?.resultRetention === "6 hours"} label="6 hours" value="6 hours" />
-                    <Radio defaultChecked={formState?.resultRetention === "12 hours"} label="12 hours" value="12 hours" />
-                    <Radio defaultChecked={formState?.resultRetention === "1 day"} label="1 day" value="1 day" />
+                    <Radio defaultChecked={formState ? formState.resultRetention === "24 hours" : true} label="24 hours" value="24 hours" />
+                    <Radio defaultChecked={formState?.resultRetention === "7 days"} label="7 days" value="7 days" />
+                    <Radio defaultChecked={formState?.resultRetention === "14 days"} label="14 days" value="14 days" />
+                    <Radio defaultChecked={formState?.resultRetention === "30 days"} label="30 days" value="30 days" />
                 </RadioGroup>
             </Form>
         </AdminPage>

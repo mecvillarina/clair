@@ -1,11 +1,17 @@
 modules:
   jira:issueActivity:
-    - key: clair-recommender
+    - key: clair-insight-activity
       resource: main
       resolver:
         function: resolver
-      viewportSize: medium
-      title: CLAIR
+      viewportSize: xlarge
+      title: CLAIR Insights
+  jira:issuePanel:
+    - key: clair-issue-panel
+      function: run-issuePanel
+      title: CLAIR Panel
+      render: native
+      icon: https://developer.atlassian.com/platform/forge/images/icons/issue-panel-icon.svg
   jira:adminPage:
     - key: clair-administration
       function: run-administration
@@ -16,14 +22,7 @@ modules:
       resolver:
         function: related-issue-queued
         method: related-issue-job-event-listener
-  # webtrigger:
-  #   - key: run-migration
-  #     function: run-sql-db-migrations
   trigger:
-    # - key: sql-db-provision-schema
-    #   function: run-sql-db-prov-schema
-    #   events:
-    #     - avi:forge:installed:app
     - key: issue-created-event
       function: issue-created
       events:
@@ -35,6 +34,8 @@ modules:
   function:
     - key: resolver
       handler: index.handler
+    - key: run-issuePanel
+      handler: clairIssuePanel.run
     - key: run-administration
       handler: administration.run
     - key: issue-created
@@ -43,10 +44,6 @@ modules:
       handler: trigger.issueUpdated
     - key: related-issue-queued
       handler: relatedIssueQueueEvents.issueJobHandler
-    # - key: run-sql-db-prov-schema
-    #   handler: sql-db.provisionSchema
-    # - key: run-sql-db-migrations
-    #   handler: sql-db.migrate
 resources:
   - key: main
     path: static/ui/build

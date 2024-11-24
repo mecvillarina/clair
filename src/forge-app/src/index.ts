@@ -1,7 +1,7 @@
 import Resolver from '@forge/resolver';
 import { fetchRelatedIssues, fetchRelatedPages, getIssueKeyElement, isIssueDetailsAvailable, updateInsightFetchDetails } from './insightService';
 import { relatedIssueJobQueue } from './relatedIssueQueueEvents';
-import { InsightDetails, KeyElement, RelatedIssueDetails, RelatedPageDetails } from './models';
+import { InsightDetails, RelatedIssueDetails, RelatedPageDetails } from './models';
 import { getIssueDetails } from './services/jiraService';
 
 const resolver = new Resolver();

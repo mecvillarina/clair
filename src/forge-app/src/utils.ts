@@ -17,15 +17,12 @@ export function findAllValuesByKey(obj, key) {
   return values;
 }
 
-export function getSeconds(value: "30 minutes" | "1 hour" | "3 hours" | "6 hours" | "12 hours" | "1 day") {
-
+export function getSeconds(value: string) {
   switch (value) {
-    case "30 minutes": return 30 * 60;
-    case "1 hour": return 60 * 60;
-    case "3 hours": return 3 * 60 * 60;
-    case "6 hours": return 6 * 60 * 60;
-    case "12 hours": return 12 * 60 * 60;
-    case "1 day": return 24 * 60 * 60;
+    case "7 days": return 7 * 24 * 60 * 60;
+    case "14 days": return 14 * 24 * 60 * 60;
+    case "30 days": return 30 * 24 * 60 * 60;
+    default: return 24 * 60 * 60;
   }
 }
 
@@ -46,10 +43,10 @@ export function calculateRecencyScore(documentDate, lambda = 0.001) {
 export function calculate75thPercentile(scores) {
   // Sort the scores in ascending order
   scores.sort((a, b) => a - b);
-  
+
   // Calculate the index for the 75th percentile
   const index = Math.ceil(0.75 * scores.length) - 1;
-  
+
   // Return the score at the 75th percentile index
   return scores[index];
 }
