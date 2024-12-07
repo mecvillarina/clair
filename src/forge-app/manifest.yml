@@ -1,0 +1,126 @@
+modules:
+  jira:issueActivity:
+    - key: clair-insight-activity
+      resource: main
+      resolver:
+        function: resolver
+      viewportSize: xlarge
+      title: CLAIR Insights
+  jira:issuePanel:
+    - key: clair-issue-panel
+      function: run-issuePanel
+      title: CLAIR Notes
+      render: native
+      icon: https://developer.atlassian.com/platform/forge/images/icons/issue-panel-icon.svg
+  jira:adminPage:
+    - key: clair-administration
+      function: run-administration
+      title: CLAIR Settings
+  consumer:
+    - key: related-issue-job-consumer
+      queue: relatedIssueJobQueue
+      resolver:
+        function: related-issue-queued
+        method: related-issue-job-event-listener
+  trigger:
+    - key: issue-created-event
+      function: issue-created
+      events:
+        - avi:jira:created:issue
+    - key: issue-updated-event
+      function: issue-updated
+      events:
+        - avi:jira:updated:issue
+  function:
+    - key: resolver
+      handler: index.handler
+    - key: run-issuePanel
+      handler: clairIssuePanel.run
+    - key: run-administration
+      handler: administration.run
+    - key: issue-created
+      handler: trigger.issueCreated
+    - key: issue-updated
+      handler: trigger.issueUpdated
+    - key: related-issue-queued
+      handler: relatedIssueQueueEvents.issueJobHandler
+resources:
+  - key: main
+    path: static/ui/build
+    tunnel:
+      port: 3000
+app:
+  runtime:
+    name: nodejs20.x
+  id: ari:cloud:ecosystem::app/2e6f2179-5e05-498d-8351-6ec16cdf4cb6
+  storage:
+    entities:
+      - name: keyelement
+        attributes:
+          issueKey:
+            type: string
+          dataKeyPhrases:
+            type: string
+          dataEntities:
+            type: string
+          dataIntent:
+            type: string
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
+        indexes:
+          - issueKey
+      - name: issuefetchdetail
+        attributes:
+          issueKey:
+            type: string
+          updatedAt:
+            type: string
+        indexes:
+          - issueKey
+      - name: relatedissue
+        attributes:
+          issueKey:
+            type: string
+          data:
+            type: string
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
+        indexes:
+          - issueKey
+      - name: relatedpage
+        attributes:
+          issueKey:
+            type: string
+          data:
+            type: string
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
+        indexes:
+          - issueKey
+      - name: clairnote
+        attributes:
+          issueKey:
+            type: string
+          data:
+            type: string
+        indexes:
+          - issueKey
+permissions:
+  scopes:
+    - read:jira-work
+    - search:confluence
+    - read:page:confluence
+    - storage:app
+  content:
+    styles:
+      - unsafe-inline
+  external:
+    fetch:
+      backend:
+        - https://api.openai.com
